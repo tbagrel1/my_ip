@@ -1,1 +1,34 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""Lightweight script to get your public ip address"""
+
+import click
+import httplib2
+import bs4
+
+WEBSITE = "http://www.monippublique.com"
+
+@click.command()
+@click.option("--dns/--no-dns", "-d", default=False)
+def main(dns):
+    """Lightweight script to get your public ip address"""
+    http = httplib2.Http()
+    try:
+        body = http.request(WEBSITE)[1]
+    except:
+        print("Error when trying to access {}".format(WEBSITE))
+        return 1
+    soup = bs4.BeautifulSoup(body, "lxml")
+    c = str(soup.find("span", {"class": "big_vert"}).get_text())
+    if dns:
+        c += " " + str(soup.find("span", {"class": "vert"}).get_text())
+    if c:
+        print(c)
+    else:
+        print("Error when getting public ip address (or dns address)")
+        return 2
+    return 0
+
+if __name__ == "__main__":
+    main()
